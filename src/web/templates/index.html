@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu2Img - Generate Food Images from Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e8f2ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .original-image-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .original-image-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .original-image-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .original-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .dishes-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        .dishes-toggle {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dishes-toggle:hover {
+            background: #e9ecef;
+        }
+
+        .dishes-toggle h3 {
+            color: #333;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .dishes-toggle .toggle-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .dishes-toggle.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .dishes-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .dish-item {
+            background: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .images-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 25px !important;
+            margin-top: 20px !important;
+            width: 100% !important;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            width: 100% !important;
+        }
+
+        .image-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .image-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-info {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .image-info h4 {
+            color: #333;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #d63031;
+        }
+
+        .success {
+            background: #e6ffe6;
+            color: #00b894;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #00b894;
+        }
+
+        @media (max-width: 1024px) {
+            .images-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 20px !important;
+            }
+            
+            .image-card img {
+                height: 260px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .images-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+            
+            .image-card img {
+                height: 250px;
+            }
+            
+            .images-grid h3 {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Menu2Img</h1>
+            <p>Upload a menu image and generate beautiful food photos for each dish</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Drop your menu image here or click to browse</div>
+                <div class="upload-subtext">Supports JPG, PNG, GIF (max 16MB)</div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+            
+            <div class="progress" id="progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+            
+            <div class="results" id="results">
+                <div class="original-image-section">
+                    <h3>Original Menu Image</h3>
+                    <div class="original-image-container">
+                        <img id="originalImage" src="" alt="Original Menu Image" loading="lazy">
+                    </div>
+                </div>
+                <div class="dishes-toggle" id="dishesToggle">
+                    <h3>📋 Extracted Menu Items</h3>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="dishes-list" id="dishesList">
+                    <h3>📋 Extracted Menu Items</h3>
+                    <div id="dishesItems"></div>
+                </div>
+                
+                <h3 style="text-align: center; margin: 30px 0 20px 0; font-size: 1.4rem; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 10px;">🖼️ Generated Images</h3>
+                <div class="images-grid" id="imagesItems">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const results = document.getElementById('results');
+        const dishesItems = document.getElementById('dishesItems');
+        const imagesItems = document.getElementById('imagesItems');
+        const dishesToggle = document.getElementById('dishesToggle');
+        const dishesList = document.getElementById('dishesList');
+        const dishesToggleIcon = dishesToggle.querySelector('.toggle-icon');
+        const originalImage = document.getElementById('originalImage');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Toggle dishes list visibility
+        dishesToggle.addEventListener('click', () => {
+            const isVisible = dishesList.style.display !== 'none';
+            dishesList.style.display = isVisible ? 'none' : 'block';
+            dishesToggleIcon.textContent = isVisible ? '▼' : '▲';
+            dishesToggle.classList.toggle('expanded', !isVisible);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select an image file.');
+                return;
+            }
+            
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File size must be less than 16MB.');
+                return;
+            }
+            
+            uploadFile(file);
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // Show progress
+            progress.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Uploading and processing menu...';
+            
+            // Hide previous results
+            results.style.display = 'none';
+            
+            // Create AbortController for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                progress.style.display = 'none';
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResults(data);
+                }
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                progress.style.display = 'none';
+                
+                if (error.name === 'AbortError') {
+                    showError('Request timed out after 5 minutes. Please try again with a smaller image or check your internet connection.');
+                } else {
+                    showError('An error occurred while processing the image: ' + error.message);
+                }
+                console.error('Error:', error);
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            // Remove previous error messages
+            const existingError = document.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            uploadArea.parentNode.insertBefore(errorDiv, uploadArea.nextSibling);
+        }
+
+        function showResults(data) {
+            // Show original image
+            if (data.original_image && data.original_image.path) {
+                originalImage.src = data.original_image.path;
+            }
+
+            // Show dishes
+            dishesItems.innerHTML = '';
+            data.dishes.forEach(dish => {
+                const dishDiv = document.createElement('div');
+                dishDiv.className = 'dish-item';
+                dishDiv.textContent = dish;
+                dishesItems.appendChild(dishDiv);
+            });
+            
+            // Reset dishes toggle to collapsed state
+            dishesList.style.display = 'none';
+            dishesToggleIcon.textContent = '▼';
+            dishesToggle.classList.remove('expanded');
+            
+            // Show generated images
+            imagesItems.innerHTML = '';
+            data.generated_images.forEach(image => {
+                const imageCard = document.createElement('div');
+                imageCard.className = 'image-card';
+                
+                // Check if this image was skipped (already existed)
+                const isSkipped = data.skipped_images && data.skipped_images.some(skipped => skipped.filename === image.filename);
+                const statusBadge = isSkipped ? '<span style="background: #ffd700; color: #333; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-left: 10px;">Cached</span>' : '';
+                
+                imageCard.innerHTML = `
+                    <img src="${image.path}" alt="${image.dish}" loading="lazy">
+                    <div class="image-info">
+                        <h4>${image.dish}${statusBadge}</h4>
+                    </div>
+                `;
+                imagesItems.appendChild(imageCard);
+            });
+            
+            results.style.display = 'block';
+            
+            // Show success message with caching info
+            let successMessage = `Successfully processed ${data.dishes.length} menu items!`;
+            
+            if (data.cached) {
+                successMessage = `📋 Loaded cached results for this menu (uploaded ${data.upload_count} times). No API calls made!`;
+            } else if (data.total_generated > 0 && data.total_skipped > 0) {
+                successMessage += ` Generated ${data.total_generated} new images and used ${data.total_skipped} cached images.`;
+            } else if (data.total_generated > 0) {
+                successMessage += ` Generated ${data.total_generated} new images.`;
+            } else if (data.total_skipped > 0) {
+                successMessage += ` All ${data.total_skipped} images were loaded from cache (no API calls made).`;
+            }
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = data.cached ? 'success' : 'success';
+            successDiv.textContent = successMessage;
+            
+            // Remove previous success messages
+            const existingSuccess = document.querySelector('.success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            uploadArea.parentNode.insertBefore(successDiv, uploadArea.nextSibling);
+        }
+    </script>
+    <script src="../../desktop/renderer.js"></script>
+</body>
+</html> 

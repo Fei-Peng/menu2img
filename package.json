@@ -1,0 +1,57 @@
+{
+  "name": "menu2img-app",
+  "version": "1.0.0",
+  "description": "Desktop app for generating food images from menu photos",
+  "main": "src/desktop/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"python src/web/app.py\" \"wait-on http://localhost:5051 && electron .\"",
+    "web": "python src/web/app.py",
+    "build": "electron-builder",
+    "build-mac": "electron-builder --mac",
+    "build-win": "electron-builder --win",
+    "build-linux": "electron-builder --linux",
+    "install-deps": "pip install -r src/shared/requirements.txt && npm install"
+  },
+  "keywords": [
+    "menu",
+    "food",
+    "image-generation",
+    "ai",
+    "openai"
+  ],
+  "author": "Menu2Img Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.menu2img.app",
+    "productName": "Menu2Img",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/desktop/main.js",
+      "src/desktop/preload.js",
+      "src/desktop/renderer.js",
+      "src/web/app.py",
+      "src/web/templates/**/*",
+      "src/shared/requirements.txt",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.food-and-drink",
+      "icon": "assets/icons/icon.icns"
+    },
+    "win": {
+      "icon": "assets/icons/icon.ico"
+    },
+    "linux": {
+      "icon": "assets/icons/icon.png"
+    }
+  }
+} 
