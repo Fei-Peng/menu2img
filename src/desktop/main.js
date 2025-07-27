@@ -54,13 +54,16 @@ function startPythonBackend() {
 
     pythonProcess.stdout.on('data', (data) => {
       console.log('Python stdout:', data.toString());
-      if (data.toString().includes('Running on http://0.0.0.0:5051')) {
+      if (data.toString().includes('Running on http://127.0.0.1:5051')) {
         resolve();
       }
     });
 
     pythonProcess.stderr.on('data', (data) => {
       console.error('Python stderr:', data.toString());
+      if (data.toString().includes('Running on http://127.0.0.1:5051')) {
+        resolve();
+      }
     });
 
     pythonProcess.on('error', (error) => {

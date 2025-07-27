@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['OUTPUT_FOLDER'] = 'dishes'
-app.config['HISTORY_FILE'] = 'upload_history.json'
+app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'uploads')
+app.config['OUTPUT_FOLDER'] = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'dishes')
+app.config['HISTORY_FILE'] = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'upload_history.json')
 
 # Ensure directories exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
