@@ -4,8 +4,6 @@ import base64
 import requests
 import time
 from werkzeug.utils import secure_filename
-from PIL import Image
-import io
 import logging
 import json
 import hashlib
